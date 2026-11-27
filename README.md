@@ -1,6 +1,6 @@
 # Surplife-LEDS-HA
 
-Control Monster / CZJUTAI Bluetooth Christmas lights (the ones that use the **Surplife** app
+Control Bluetooth Christmas lights that use the **Surplife** app (sold under brands such as Monster and CZJUTAI,
 and advertise as `IOTBTxxxx`) from Home Assistant, with no cloud and no phone.
 
 Tested hardware: CZJUTAI LED controller `JT-EL/FC050V2000-H15`, firmware `BT.80.00AA.55.0D,V10`,
@@ -18,7 +18,7 @@ Tested hardware: CZJUTAI LED controller `JT-EL/FC050V2000-H15`, firmware `BT.80.
   - The controller's own scenes: **Christmas**, **Christmas flow**, **Rainbow**
 - An **Effect** dropdown entity for each light (device page, dashboards, automations); it shows
   the current effect and turns the light on with whatever you pick
-- `monster_leds.set_leds` action to color individual LEDs
+- `surplife.set_leds` action to color individual LEDs
 - On/off state updates from the lights' Bluetooth advertisements, even when changed from the app
   or remote
 - Works with the Home Assistant host's Bluetooth adapter or an ESPHome Bluetooth proxy
@@ -31,9 +31,9 @@ lights off, stops the animation.
 
 1. In HACS, open the three-dot menu, choose **Custom repositories**, and add
    `https://github.com/kingofl337/Surplife-LEDS-HA` as type **Integration**.
-2. Download **Monster LEDs (Surplife Bluetooth)** and restart Home Assistant.
+2. Download **Surplife Bluetooth Lights** and restart Home Assistant.
 3. The lights should be discovered automatically. If not, go to **Settings → Devices & services →
-   Add integration → Monster LEDs**.
+   Add integration → Surplife Bluetooth Lights**.
 
 Close the Surplife app (or turn off the phone's Bluetooth) while Home Assistant is talking to
 the lights: they accept only one connection at a time. Home Assistant disconnects after 60 seconds
@@ -41,12 +41,19 @@ of inactivity so the app can be used again.
 
 If you use an ESPHome Bluetooth proxy, it needs `active: true` to make connections.
 
+### Upgrading from 0.3 (monster_leds)
+
+Version 0.4 renamed the integration from `monster_leds` to `surplife`. Delete the old light entries
+under **Settings → Devices & services**, redownload the integration in HACS, restart, and add the
+lights again. Entity IDs change from `light.monster_lights_…` to `light.surplife_lights_…`, so
+update any automations that use them.
+
 ### Example: color single LEDs
 
 ```yaml
-action: monster_leds.set_leds
+action: surplife.set_leds
 target:
-  entity_id: light.monster_lights_iotbtcd8
+  entity_id: light.surplife_lights_iotbtcd8
 data:
   leds: [1, 5, 10]
   rgb_color: [255, 0, 0]

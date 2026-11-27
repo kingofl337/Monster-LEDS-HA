@@ -1,4 +1,4 @@
-"""Monster / CZJUTAI string lights that use the Surplife app (IOTBTxxxx)."""
+"""String lights that use the Surplife app (IOTBTxxxx)."""
 from __future__ import annotations
 
 import asyncio
@@ -142,4 +142,3 @@ class SurplifeLights(LightDevice):
         self._fire()
 
 
-MonsterLeds = SurplifeLights  # name used by version 0.1

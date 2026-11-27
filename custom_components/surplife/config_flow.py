@@ -21,15 +21,15 @@ def _supported(info: BluetoothServiceInfoBleak) -> bool:
 
 
 def _title(info: BluetoothServiceInfoBleak) -> str:
-    return f"Monster lights {info.name or info.address}"
+    return f"Surplife lights {info.name or info.address}"
 
 
 def _data(info: BluetoothServiceInfoBleak) -> dict[str, str]:
     return {CONF_ADDRESS: info.address}
 
 
-class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle setup of Monster / Surplife lights."""
+class SurplifeConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle setup of Surplife lights."""
 
     VERSION = 1
 

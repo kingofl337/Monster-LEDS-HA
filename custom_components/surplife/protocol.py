@@ -1,4 +1,4 @@
-"""Surplife / Monster IOTBT Bluetooth light protocol.
+"""Surplife IOTBT Bluetooth light protocol.
 
 Pure Python (no Home Assistant imports) so it can be unit tested on its own.
 Decoded from an Android HCI snoop capture of the Surplife app; see README.md.

@@ -8,8 +8,8 @@ import pathlib
 import sys
 
 # Load protocol.py directly so the tests don't need Home Assistant installed
-_PATH = pathlib.Path(__file__).parents[1] / "custom_components" / "monster_leds" / "protocol.py"
-_spec = importlib.util.spec_from_file_location("monster_leds_protocol", _PATH)
+_PATH = pathlib.Path(__file__).parents[1] / "custom_components" / "surplife" / "protocol.py"
+_spec = importlib.util.spec_from_file_location("surplife_protocol", _PATH)
 p = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = p
 _spec.loader.exec_module(p)
