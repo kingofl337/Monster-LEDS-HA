@@ -14,7 +14,7 @@
     },
     "abort": {
       "already_configured": "These lights are already set up.",
-      "no_devices_found": "No IOTBT lights found. Make sure they are powered, close the Surplife app, and check that they are in range of a Bluetooth adapter or ESPHome Bluetooth proxy."
+      "no_devices_found": "No supported lights found (IOTBT… or MELK-OF21…). Make sure they are powered, close the Surplife / Lotus Lamp X app, and check that they are in range of a Bluetooth adapter or ESPHome Bluetooth proxy."
     }
   },
   "services": {
@@ -24,7 +24,7 @@
       "fields": {
         "leds": {
           "name": "LEDs",
-          "description": "LED numbers, starting at 1."
+          "description": "LED numbers (Surplife) or segment numbers 1-28 (Lotus strip), starting at 1."
         },
         "rgb_color": {
           "name": "Color",

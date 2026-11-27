@@ -1,33 +1,39 @@
 # Surplife-LEDS-HA
 
-Control Monster / CZJUTAI Bluetooth Christmas lights (the ones that use the **Surplife** app
-and advertise as `IOTBTxxxx`) from Home Assistant, with no cloud and no phone.
+Control Bluetooth Christmas lights from Home Assistant, with no cloud and no phone:
 
-Tested hardware: CZJUTAI LED controller `JT-EL/FC050V2000-H15`, firmware `BT.80.00AA.55.0D,V10`,
-50 RGB LEDs.
+- Monster / CZJUTAI lights that use the **Surplife** app and advertise as `IOTBTxxxx`
+  (tested: controller `JT-EL/FC050V2000-H15`, firmware `BT.80.00AA.55.0D,V10`, 50 RGB LEDs)
+- **Lotus Lamp X** strips that advertise as `MELK-OF21…` (28 segments)
 
 ## Features
 
-- On / off
-- Color and brightness for the whole string
-- Effects:
-  - Animated scenes from the app: **Christmas** (red, white, green, white) and **Rainbow**
-  - Static patterns: **Candy cane**, **Red & green**, **Red, green & white**
-- `monster_leds.set_leds` action to color individual LEDs
-- On/off state updates from the lights' Bluetooth advertisements, even when changed from the app
-  or remote
+- On / off, color and brightness
+- Christmas effects for both kinds of lights:
+  - Static patterns: **Candy cane**, **Red & green**, **Red, green & white**, **Classic multicolor**,
+    **Gold & white**, **Warm white**, **Winter ice**
+  - Animated by Home Assistant: **Candy cane chase**, **Christmas chase**, **Multicolor chase**,
+    **Christmas twinkle**, **Warm white twinkle**, **Red & green flip**
+  - Surplife lights also get the controller's own scenes: **Christmas**, **Christmas flow**, **Rainbow**
+- `monster_leds.set_leds` action to color individual LEDs (Surplife) or segments 1–28 (Lotus)
+- Surplife lights report on/off through their Bluetooth advertisements, even when changed from the
+  app or remote. Lotus strips don't report anything, so their state is what Home Assistant last sent.
 - Works with the Home Assistant host's Bluetooth adapter or an ESPHome Bluetooth proxy
+
+Animated effects keep a Bluetooth connection open and send a new frame every 1–2 seconds
+(a Lotus segment update takes about a second). Choosing a color or another effect, or turning the
+lights off, stops the animation.
 
 ## Install
 
 1. In HACS, open the three-dot menu, choose **Custom repositories**, and add
    `https://github.com/kingofl337/Monster-LEDS-HA` as type **Integration**.
-2. Download **Monster LEDs (Surplife Bluetooth)** and restart Home Assistant.
+2. Download **Monster LEDs (Surplife & Lotus Bluetooth)** and restart Home Assistant.
 3. The lights should be discovered automatically. If not, go to **Settings → Devices & services →
    Add integration → Monster LEDs**.
 
-Close the Surplife app (or turn off the phone's Bluetooth) while Home Assistant is talking to
-the lights: they accept only one connection at a time. Home Assistant disconnects after 60 seconds
+Close the Surplife / Lotus Lamp X app (or turn off the phone's Bluetooth) while Home Assistant
+is talking to the lights: they accept only one connection at a time. Home Assistant disconnects after 60 seconds
 of inactivity so the app can be used again.
 
 If you use an ESPHome Bluetooth proxy, it needs `active: true` to make connections.
@@ -45,6 +51,8 @@ data:
 ```
 
 ## Protocol
+
+### Surplife (IOTBTxxxx)
 
 Decoded from an Android HCI snoop log of the Surplife app.
 
@@ -70,6 +78,24 @@ Decoded from an Android HCI snoop log of the Surplife app.
 - Status replies and the advertisement's manufacturer data (company `0x5A02`) share a state block:
   `power(23/24) mode(25 scene, 66 pixels) effect speed F0 H S V 00 00 01 count_hi count_lo`.
 
+### Lotus Lamp X (MELK-OF21)
+
+Decoded from three Android HCI snoop logs of the Lotus Lamp X app. Every command is one 9-byte
+write (without response) to `0000fff3-0000-1000-8000-00805f9b34fb`; no notifications, no encryption.
+
+| Command | Bytes |
+| --- | --- |
+| Set clock (app sends on connect) | `7E 06 83 hh mm ss weekday 00 EF` |
+| Query (then read FFF3: `7E 07 37 <segments> …`) | `7E 07 37 FF FF FF 00 FF EF` |
+| Power on / off | `7E 07 04 FF 00 01 02 01 EF` / `7E 07 04 00 00 00 02 01 EF` |
+| Color | `7E 07 05 03 RR GG BB 10 EF` |
+| Brightness 0–100 % | `7E 04 01 PP 01 FF 02 01 EF` |
+| Built-in effect | `7E 07 03 <id> 06 FF FF 00 EF` |
+| Segment colors | `7E 07 37 <n> 00 01 01 00 EF`, `7E 32 <3n> 00 CK_HI CK_LO FF FF EF`, n/2 × `7E 33 R G B R G B <index>`, `7E 34 00 00 64 FF FF FF EF` |
+
+`CK` is the 16-bit sum of every byte of the `7E 32` packet (without CK), the `7E 33` packets and
+the `7E 34` packet.
+
 `tools/surplife_lights.py` is a standalone command-line version (Windows, macOS, Linux) using
 [bleak](https://github.com/hbldh/bleak):
 
@@ -79,5 +105,5 @@ python tools/surplife_lights.py scan
 python tools/surplife_lights.py pattern red white green white
 ```
 
-`tests/test_protocol.py` checks the encoder against packets captured from the app
-(`python tests/test_protocol.py`).
+`tests/test_protocol.py` and `tests/test_melk_protocol.py` check the encoders against packets
+captured from the apps (`python tests/test_protocol.py`, `python tests/test_melk_protocol.py`).

@@ -12,12 +12,28 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_ADDRESS
 
-from .const import DOMAIN
-from .protocol import NAME_PREFIX
+from . import melk_protocol, protocol
+from .const import CONF_MODEL, DOMAIN, MODEL_MELK, MODEL_SURPLIFE
+
+
+def _model(info: BluetoothServiceInfoBleak) -> str | None:
+    name = (info.name or "").upper()
+    if name.startswith(protocol.NAME_PREFIX):
+        return MODEL_SURPLIFE
+    if name.startswith(melk_protocol.NAME_PREFIX):
+        return MODEL_MELK
+    return None
 
 
 def _title(info: BluetoothServiceInfoBleak) -> str:
-    return f"Monster lights {info.name or info.address}"
+    name = " ".join((info.name or info.address).split())
+    if _model(info) == MODEL_MELK:
+        return f"Lotus strip {name}"
+    return f"Monster lights {name}"
+
+
+def _data(info: BluetoothServiceInfoBleak) -> dict[str, str]:
+    return {CONF_ADDRESS: info.address, CONF_MODEL: _model(info) or MODEL_SURPLIFE}
 
 
 class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -39,9 +55,7 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_bluetooth_confirm(self, user_input: dict[str, Any] | None = None):
         assert self._discovery is not None
         if user_input is not None:
-            return self.async_create_entry(
-                title=_title(self._discovery), data={CONF_ADDRESS: self._discovery.address}
-            )
+            return self.async_create_entry(title=_title(self._discovery), data=_data(self._discovery))
         self._set_confirm_only()
         return self.async_show_form(
             step_id="bluetooth_confirm",
@@ -53,15 +67,14 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
             address = user_input[CONF_ADDRESS]
             await self.async_set_unique_id(address, raise_on_progress=False)
             self._abort_if_unique_id_configured()
-            return self.async_create_entry(
-                title=_title(self._found[address]), data={CONF_ADDRESS: address}
-            )
+            info = self._found[address]
+            return self.async_create_entry(title=_title(info), data=_data(info))
 
         configured = self._async_current_ids()
         for info in async_discovered_service_info(self.hass, connectable=True):
             if info.address in configured:
                 continue
-            if (info.name or "").upper().startswith(NAME_PREFIX):
+            if _model(info) is not None:
                 self._found[info.address] = info
         if not self._found:
             return self.async_abort(reason="no_devices_found")
@@ -70,7 +83,7 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_ADDRESS): vol.In(
-                    {addr: f"{info.name} ({addr})" for addr, info in self._found.items()}
+                    {addr: f"{_title(info)} ({addr})" for addr, info in self._found.items()}
                 )
             }),
         )

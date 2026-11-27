@@ -23,8 +23,9 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import color as color_util
 
-from .const import DOMAIN, EFFECT_LIST
-from .device import MonsterLeds
+from .base import LightDevice
+from .const import DOMAIN
+from .melk_device import MelkLights
 
 SERVICE_SET_LEDS = "set_leds"
 ATTR_LEDS = "leds"
@@ -57,17 +58,18 @@ class MonsterLedsLight(LightEntity):
     _attr_supported_color_modes = {ColorMode.HS}
     _attr_color_mode = ColorMode.HS
     _attr_supported_features = LightEntityFeature.EFFECT
-    _attr_effect_list = [EFFECT_OFF, *EFFECT_LIST]
 
-    def __init__(self, device: MonsterLeds, entry: ConfigEntry) -> None:
+    def __init__(self, device: LightDevice, entry: ConfigEntry) -> None:
         self._device = device
+        self._attr_effect_list = [EFFECT_OFF, *device.effect_list]
+        self._attr_assumed_state = device.assumed_state
         self._attr_unique_id = dr.format_mac(device.address)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.address)},
             connections={(dr.CONNECTION_BLUETOOTH, device.address)},
             name=entry.title,
-            manufacturer="Monster / Changzhou Jutai",
-            model="Surplife Bluetooth string lights",
+            manufacturer="Lotus Lamp X" if isinstance(device, MelkLights) else "Monster / Changzhou Jutai",
+            model="MELK-OF21 strip" if isinstance(device, MelkLights) else "Surplife Bluetooth string lights",
         )
 
     async def async_added_to_hass(self) -> None:
@@ -99,7 +101,7 @@ class MonsterLedsLight(LightEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"led_count": self._device.led_count}
+        return {"segments" if isinstance(self._device, MelkLights) else "led_count": self._device.pixel_count}
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         brightness = kwargs.get(ATTR_BRIGHTNESS)
