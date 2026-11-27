@@ -13,8 +13,8 @@ Tested hardware: CZJUTAI LED controller `JT-EL/FC050V2000-H15`, firmware `BT.80.
   - Static patterns: **Candy cane**, **Red & green**, **Red, green & white**, **Classic multicolor**,
     **Gold & white**, **Warm white**, **Winter ice**
   - Animated by Home Assistant: **Candy cane chase**, **Christmas chase**, **Multicolor chase**,
-    **Christmas twinkle**, **Warm white twinkle**, **Red & green flip**, **R+G Fade** (red fades
-    up and down, then green)
+    **Christmas twinkle**, **Warm white twinkle**, **Red & green flip**, **R+G Fade** (pixels
+    alternate red and green; the reds fade out and back, then the greens)
   - The controller's own scenes: **Christmas**, **Christmas flow**, **Rainbow**
 - An **Effect** dropdown entity for each light (device page, dashboards, automations); it shows
   the current effect and turns the light on with whatever you pick
