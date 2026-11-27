@@ -1,4 +1,4 @@
-"""Monster / Surplife Bluetooth string lights."""
+"""Surplife Bluetooth string lights."""
 from __future__ import annotations
 
 from homeassistant.components import bluetooth

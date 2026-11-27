@@ -1,9 +1,9 @@
-"""Constants and effect definitions for the Monster LEDs integration."""
+"""Constants and effect definitions for the Surplife integration."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-DOMAIN = "monster_leds"
+DOMAIN = "surplife"
 
 DEFAULT_LED_COUNT = 50
 IDLE_DISCONNECT_SECONDS = 60  # free the lights for the phone app / proxy slots

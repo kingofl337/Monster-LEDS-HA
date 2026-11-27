@@ -1,7 +1,7 @@
 set_leds:
   target:
     entity:
-      integration: monster_leds
+      integration: surplife
       domain: light
   fields:
     leds:

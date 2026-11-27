@@ -20,10 +20,10 @@ SOLID_COLOR = "Solid color"
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities([MonsterLedsEffectSelect(entry.runtime_data)])
+    async_add_entities([SurplifeEffectSelect(entry.runtime_data)])
 
 
-class MonsterLedsEffectSelect(SelectEntity):
+class SurplifeEffectSelect(SelectEntity):
     """Mirrors the light's effect; choosing an option turns the light on with it."""
 
     _attr_has_entity_name = True

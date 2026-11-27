@@ -1,4 +1,4 @@
-"""Light entity for Monster / Surplife Bluetooth string lights."""
+"""Light entity for Surplife Bluetooth string lights."""
 from __future__ import annotations
 
 from typing import Any
@@ -35,7 +35,7 @@ ATTR_BRIGHTNESS_PCT = "brightness_pct"
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities([MonsterLedsLight(entry.runtime_data, entry)])
+    async_add_entities([SurplifeLight(entry.runtime_data, entry)])
     platform = entity_platform.async_get_current_platform()
     platform.async_register_entity_service(
         SERVICE_SET_LEDS,
@@ -48,7 +48,7 @@ async def async_setup_entry(
     )
 
 
-class MonsterLedsLight(LightEntity):
+class SurplifeLight(LightEntity):
     """The whole light string as one entity."""
 
     _attr_has_entity_name = True
@@ -67,7 +67,7 @@ class MonsterLedsLight(LightEntity):
             identifiers={(DOMAIN, device.address)},
             connections={(dr.CONNECTION_BLUETOOTH, device.address)},
             name=entry.title,
-            manufacturer="Monster / Changzhou Jutai",
+            manufacturer="Surplife",
             model="Surplife Bluetooth string lights",
         )
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Control Monster / CZJUTAI "Surplife" Bluetooth string lights (advertise as IOTBTxxxx)
+Control "Surplife" Bluetooth string lights (advertise as IOTBTxxxx)
 without the phone app.
 
 Protocol decoded from an Android HCI snoop capture of the Surplife app.

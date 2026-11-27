@@ -1,6 +1,6 @@
 {
-  "domain": "monster_leds",
-  "name": "Monster LEDs (Surplife Bluetooth)",
+  "domain": "surplife",
+  "name": "Surplife Bluetooth Lights",
   "bluetooth": [
     {
       "local_name": "IOTBT*",
@@ -17,5 +17,5 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/kingofl337/Surplife-LEDS-HA/issues",
   "requirements": [],
-  "version": "0.3.0"
+  "version": "0.4.0"
 }
