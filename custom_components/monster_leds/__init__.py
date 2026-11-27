@@ -10,7 +10,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 
 from .device import SurplifeLights
 
-PLATFORMS = [Platform.LIGHT]
+PLATFORMS = [Platform.LIGHT, Platform.SELECT]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
