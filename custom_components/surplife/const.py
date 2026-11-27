@@ -42,7 +42,7 @@ class Animation:
     sparkle: Color = WHITE          # twinkle only
     sparkle_share: float = 0.15     # twinkle only: share of pixels lit each frame
     frames: list[list[Color]] = field(default_factory=list)  # alternate only
-    steps: int = 10                 # fade only: frames to fade up (and again to fade down)
+    steps: int = 10                 # fade only: frames to fade out (and again to fade back)
 
 
 ANIMATIONS: dict[str, Animation] = {
@@ -54,8 +54,8 @@ ANIMATIONS: dict[str, Animation] = {
                                     sparkle_share=0.2),
     "Red & green flip": Animation("alternate", [], interval=2.0,
                                   frames=[[RED, GREEN], [GREEN, RED]]),
-    # Whole string fades up and down in red, then in green
-    "R+G Fade": Animation("fade", [RED, GREEN], interval=0.06, steps=30),
+    # Pixels alternate red, green; the reds fade out and back, then the greens
+    "R+G Fade": Animation("fade", [RED, GREEN], interval=0.06, steps=25),
 }
 
 # Animated scenes built into the Surplife controller: effect id + color list

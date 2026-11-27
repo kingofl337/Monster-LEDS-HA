@@ -21,13 +21,14 @@ class SurplifeLights(LightDevice):
     """Talks to one Surplife controller; keeps an optimistic copy of its state."""
 
     min_interval = 0.3  # one frame is 2 writes, about 0.15 s
-    uniform_min_interval = 0.05  # an all-one-color frame is a single short write
+    uniform_min_interval = 0.05  # fades change one color group: a single short write
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         super().__init__(ble_device, name)
         self._seq = 0
         self._chunk = p.APP_CHUNK
         self.led_count = DEFAULT_LED_COUNT
+        self._last_frame: list[Color] | None = None  # what the LEDs show, if we know
 
     @property
     def pixel_count(self) -> int:
@@ -84,6 +85,7 @@ class SurplifeLights(LightDevice):
         self._chunk = p.chunk_for_mtu(await self._read_mtu(client))
         await client.start_notify(p.NOTIFY_UUID, self._on_notify)
         self._seq = 0
+        self._last_frame = None
         # Same opening the Surplife app uses: set the clock, then ask for status
         await self._write(client, p.cmd_set_time())
         await self._write(client, p.cmd_status())
@@ -114,21 +116,41 @@ class SurplifeLights(LightDevice):
 
     # ---------------------------------------------------------- protocol hooks
     async def _send_power(self, on: bool, client) -> None:
+        self._last_frame = None
         await self._command(client, p.cmd_power(on))
 
     async def _send_solid(self, hs, brightness_pct, client) -> None:
+        self._last_frame = None
         await self._command(client, p.cmd_frame([(hs[0], hs[1], brightness_pct)] * self.led_count))
 
     async def _send_frame(self, colors: list[Color], client) -> None:
-        if colors and all(c == colors[0] for c in colors):
-            # Whole strip one color: an 18-byte "these LEDs" command with every bit set is
-            # one write instead of a 259-byte frame, so smooth fades can run at ~10 Hz.
-            leds = list(range(1, len(colors) + 1))
-            await self._write(client, p.cmd_leds(leds, colors[0], len(colors)))
-            return
-        await self._command(client, p.cmd_frame(colors))
+        """Show a frame, sending only what changed when that is cheaper.
+
+        A full frame is a 259-byte write. The "these LEDs" bitmask command is 18 bytes,
+        so a frame whose changed LEDs share one or two colors (a fade, or a whole-strip
+        color) goes out as one or two short writes and animations can run at ~10 Hz.
+        """
+        last = self._last_frame
+        if last is None or len(last) != len(colors):
+            changed = list(range(len(colors)))
+            if any(c != colors[0] for c in colors):
+                await self._command(client, p.cmd_frame(colors))
+                self._last_frame = list(colors)
+                return
+        else:
+            changed = [i for i, c in enumerate(colors) if c != last[i]]
+        groups: dict[Color, list[int]] = {}
+        for i in changed:
+            groups.setdefault(colors[i], []).append(i + 1)
+        if len(groups) > 2:
+            await self._command(client, p.cmd_frame(colors))
+        else:
+            for color, leds in groups.items():
+                await self._write(client, p.cmd_leds(leds, color, len(colors)))
+        self._last_frame = list(colors)
 
     async def _send_scene(self, name: str, brightness_pct: float, client) -> None:
+        self._last_frame = None
         effect_id, colors = SURPLIFE_SCENES[name]
         await self._command(client, p.cmd_scene(effect_id, [dim(c, brightness_pct) for c in colors]))
 
@@ -141,6 +163,7 @@ class SurplifeLights(LightDevice):
         async def _act(client) -> None:
             if not was_on:
                 await self._send_power(True, client)
+            self._last_frame = None
             await self._command(client, p.cmd_leds(leds, (hs[0], hs[1], brightness_pct), self.led_count))
 
         await self.link.run(_act)
