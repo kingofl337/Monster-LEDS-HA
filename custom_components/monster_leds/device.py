@@ -20,7 +20,7 @@ COMMAND_GAP = 0.1    # seconds between commands in one request
 class SurplifeLights(LightDevice):
     """Talks to one Surplife controller; keeps an optimistic copy of its state."""
 
-    min_interval = 0.5
+    min_interval = 0.3  # one frame is 2 writes, about 0.15 s
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         super().__init__(ble_device, name)

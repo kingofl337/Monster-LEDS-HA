@@ -31,6 +31,12 @@ def animation_frame(anim: Animation, step: int, n: int, rng: random.Random) -> l
         return repeat(anim.colors, n, offset=-step)
     if anim.kind == "alternate":
         return repeat(anim.frames[step % len(anim.frames)], n)
+    if anim.kind == "fade":
+        cycle = 2 * anim.steps  # up then down
+        h, s, v = anim.colors[(step // cycle) % len(anim.colors)]
+        pos = step % cycle
+        level = (pos if pos <= anim.steps else cycle - pos) / anim.steps
+        return repeat([(h, s, v * level * level)], n)  # squared: looks even to the eye
     if anim.kind == "twinkle":
         frame = repeat(anim.colors, n)
         for i in rng.sample(range(n), max(1, round(n * anim.sparkle_share))):
