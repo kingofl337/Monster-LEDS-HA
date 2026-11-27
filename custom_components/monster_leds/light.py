@@ -23,8 +23,8 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import color as color_util
 
-from .const import DOMAIN, EFFECT_LIST
-from .device import MonsterLeds
+from .base import LightDevice
+from .const import DOMAIN
 
 SERVICE_SET_LEDS = "set_leds"
 ATTR_LEDS = "leds"
@@ -57,10 +57,11 @@ class MonsterLedsLight(LightEntity):
     _attr_supported_color_modes = {ColorMode.HS}
     _attr_color_mode = ColorMode.HS
     _attr_supported_features = LightEntityFeature.EFFECT
-    _attr_effect_list = [EFFECT_OFF, *EFFECT_LIST]
 
-    def __init__(self, device: MonsterLeds, entry: ConfigEntry) -> None:
+    def __init__(self, device: LightDevice, entry: ConfigEntry) -> None:
         self._device = device
+        self._attr_effect_list = [EFFECT_OFF, *device.effect_list]
+        self._attr_assumed_state = device.assumed_state
         self._attr_unique_id = dr.format_mac(device.address)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.address)},
@@ -99,7 +100,7 @@ class MonsterLedsLight(LightEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"led_count": self._device.led_count}
+        return {"led_count": self._device.pixel_count}
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         brightness = kwargs.get(ATTR_BRIGHTNESS)

@@ -8,20 +8,26 @@ Tested hardware: CZJUTAI LED controller `JT-EL/FC050V2000-H15`, firmware `BT.80.
 
 ## Features
 
-- On / off
-- Color and brightness for the whole string
-- Effects:
-  - Animated scenes from the app: **Christmas** (red, white, green, white) and **Rainbow**
-  - Static patterns: **Candy cane**, **Red & green**, **Red, green & white**
+- On / off, color and brightness
+- Christmas effects:
+  - Static patterns: **Candy cane**, **Red & green**, **Red, green & white**, **Classic multicolor**,
+    **Gold & white**, **Warm white**, **Winter ice**
+  - Animated by Home Assistant: **Candy cane chase**, **Christmas chase**, **Multicolor chase**,
+    **Christmas twinkle**, **Warm white twinkle**, **Red & green flip**
+  - The controller's own scenes: **Christmas**, **Christmas flow**, **Rainbow**
 - `monster_leds.set_leds` action to color individual LEDs
 - On/off state updates from the lights' Bluetooth advertisements, even when changed from the app
   or remote
 - Works with the Home Assistant host's Bluetooth adapter or an ESPHome Bluetooth proxy
 
+Animated effects keep a Bluetooth connection open and send a new frame every 1–2 seconds.
+Choosing a color or another effect, or turning the
+lights off, stops the animation.
+
 ## Install
 
 1. In HACS, open the three-dot menu, choose **Custom repositories**, and add
-   `https://github.com/kingofl337/Monster-LEDS-HA` as type **Integration**.
+   `https://github.com/kingofl337/Surplife-LEDS-HA` as type **Integration**.
 2. Download **Monster LEDs (Surplife Bluetooth)** and restart Home Assistant.
 3. The lights should be discovered automatically. If not, go to **Settings → Devices & services →
    Add integration → Monster LEDs**.

@@ -16,8 +16,16 @@ from .const import DOMAIN
 from .protocol import NAME_PREFIX
 
 
+def _supported(info: BluetoothServiceInfoBleak) -> bool:
+    return (info.name or "").upper().startswith(NAME_PREFIX)
+
+
 def _title(info: BluetoothServiceInfoBleak) -> str:
     return f"Monster lights {info.name or info.address}"
+
+
+def _data(info: BluetoothServiceInfoBleak) -> dict[str, str]:
+    return {CONF_ADDRESS: info.address}
 
 
 class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -39,9 +47,7 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_bluetooth_confirm(self, user_input: dict[str, Any] | None = None):
         assert self._discovery is not None
         if user_input is not None:
-            return self.async_create_entry(
-                title=_title(self._discovery), data={CONF_ADDRESS: self._discovery.address}
-            )
+            return self.async_create_entry(title=_title(self._discovery), data=_data(self._discovery))
         self._set_confirm_only()
         return self.async_show_form(
             step_id="bluetooth_confirm",
@@ -53,15 +59,14 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
             address = user_input[CONF_ADDRESS]
             await self.async_set_unique_id(address, raise_on_progress=False)
             self._abort_if_unique_id_configured()
-            return self.async_create_entry(
-                title=_title(self._found[address]), data={CONF_ADDRESS: address}
-            )
+            info = self._found[address]
+            return self.async_create_entry(title=_title(info), data=_data(info))
 
         configured = self._async_current_ids()
         for info in async_discovered_service_info(self.hass, connectable=True):
             if info.address in configured:
                 continue
-            if (info.name or "").upper().startswith(NAME_PREFIX):
+            if _supported(info):
                 self._found[info.address] = info
         if not self._found:
             return self.async_abort(reason="no_devices_found")
@@ -70,7 +75,7 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_ADDRESS): vol.In(
-                    {addr: f"{info.name} ({addr})" for addr, info in self._found.items()}
+                    {addr: f"{_title(info)} ({addr})" for addr, info in self._found.items()}
                 )
             }),
         )
