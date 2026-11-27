@@ -21,6 +21,7 @@ class SurplifeLights(LightDevice):
     """Talks to one Surplife controller; keeps an optimistic copy of its state."""
 
     min_interval = 0.3  # one frame is 2 writes, about 0.15 s
+    uniform_min_interval = 0.05  # an all-one-color frame is a single short write
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         super().__init__(ble_device, name)
@@ -119,6 +120,12 @@ class SurplifeLights(LightDevice):
         await self._command(client, p.cmd_frame([(hs[0], hs[1], brightness_pct)] * self.led_count))
 
     async def _send_frame(self, colors: list[Color], client) -> None:
+        if colors and all(c == colors[0] for c in colors):
+            # Whole strip one color: an 18-byte "these LEDs" command with every bit set is
+            # one write instead of a 259-byte frame, so smooth fades can run at ~10 Hz.
+            leds = list(range(1, len(colors) + 1))
+            await self._write(client, p.cmd_leds(leds, colors[0], len(colors)))
+            return
         await self._command(client, p.cmd_frame(colors))
 
     async def _send_scene(self, name: str, brightness_pct: float, client) -> None:

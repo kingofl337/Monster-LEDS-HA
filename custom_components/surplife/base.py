@@ -50,6 +50,7 @@ class LightDevice:
 
     assumed_state = False
     min_interval = 0.5  # seconds; slower devices raise this
+    uniform_min_interval = 0.5  # for frames where every LED has the same color
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         self.name = name
@@ -139,7 +140,8 @@ class LightDevice:
                 pass
 
     def _start_animation(self, anim: Animation, brightness_pct: float) -> None:
-        interval = max(anim.interval, self.min_interval)
+        floor = self.uniform_min_interval if anim.kind == "fade" else self.min_interval
+        interval = max(anim.interval, floor)
         self._anim_task = asyncio.get_running_loop().create_task(
             self._animate(anim, brightness_pct, interval), name=f"{self.name} animation"
         )
