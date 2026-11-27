@@ -107,3 +107,9 @@ if __name__ == "__main__":
         if name.startswith("test_"):
             fn()
             print("PASS", name)
+
+
+def test_all_leds_bitmask_is_one_short_write():
+    payload = p.cmd_leds(list(range(1, 51)), (0, 100, 50), 50)
+    assert payload.hex() == "e10d000150640000643264ffffffffffffc0"
+    assert len(p.wrap(payload, 1, p.APP_CHUNK)) == 1
