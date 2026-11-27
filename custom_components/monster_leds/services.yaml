@@ -1,0 +1,23 @@
+set_leds:
+  target:
+    entity:
+      integration: monster_leds
+      domain: light
+  fields:
+    leds:
+      required: true
+      example: [1, 5, 10]
+      selector:
+        object:
+    rgb_color:
+      required: true
+      example: [255, 0, 0]
+      selector:
+        color_rgb:
+    brightness_pct:
+      default: 100
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
