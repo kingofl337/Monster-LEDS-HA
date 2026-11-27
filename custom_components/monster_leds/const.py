@@ -4,9 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 DOMAIN = "monster_leds"
-CONF_MODEL = "model"
-MODEL_SURPLIFE = "surplife"  # Monster / CZJUTAI lights, Surplife app, IOTBTxxxx
-MODEL_MELK = "melk"          # Lotus Lamp X strip, MELK-OF21
 
 DEFAULT_LED_COUNT = 50
 IDLE_DISCONNECT_SECONDS = 60  # free the lights for the phone app / proxy slots

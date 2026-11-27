@@ -25,7 +25,6 @@ from homeassistant.util import color as color_util
 
 from .base import LightDevice
 from .const import DOMAIN
-from .melk_device import MelkLights
 
 SERVICE_SET_LEDS = "set_leds"
 ATTR_LEDS = "leds"
@@ -68,8 +67,8 @@ class MonsterLedsLight(LightEntity):
             identifiers={(DOMAIN, device.address)},
             connections={(dr.CONNECTION_BLUETOOTH, device.address)},
             name=entry.title,
-            manufacturer="Lotus Lamp X" if isinstance(device, MelkLights) else "Monster / Changzhou Jutai",
-            model="MELK-OF21 strip" if isinstance(device, MelkLights) else "Surplife Bluetooth string lights",
+            manufacturer="Monster / Changzhou Jutai",
+            model="Surplife Bluetooth string lights",
         )
 
     async def async_added_to_hass(self) -> None:
@@ -101,7 +100,7 @@ class MonsterLedsLight(LightEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"segments" if isinstance(self._device, MelkLights) else "led_count": self._device.pixel_count}
+        return {"led_count": self._device.pixel_count}
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         brightness = kwargs.get(ATTR_BRIGHTNESS)

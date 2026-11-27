@@ -1,13 +1,9 @@
 {
   "domain": "monster_leds",
-  "name": "Monster LEDs (Surplife & Lotus Bluetooth)",
+  "name": "Monster LEDs (Surplife Bluetooth)",
   "bluetooth": [
     {
       "local_name": "IOTBT*",
-      "connectable": true
-    },
-    {
-      "local_name": "MELK-OF21*",
       "connectable": true
     }
   ],

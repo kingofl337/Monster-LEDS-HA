@@ -12,28 +12,20 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_ADDRESS
 
-from . import melk_protocol, protocol
-from .const import CONF_MODEL, DOMAIN, MODEL_MELK, MODEL_SURPLIFE
+from .const import DOMAIN
+from .protocol import NAME_PREFIX
 
 
-def _model(info: BluetoothServiceInfoBleak) -> str | None:
-    name = (info.name or "").upper()
-    if name.startswith(protocol.NAME_PREFIX):
-        return MODEL_SURPLIFE
-    if name.startswith(melk_protocol.NAME_PREFIX):
-        return MODEL_MELK
-    return None
+def _supported(info: BluetoothServiceInfoBleak) -> bool:
+    return (info.name or "").upper().startswith(NAME_PREFIX)
 
 
 def _title(info: BluetoothServiceInfoBleak) -> str:
-    name = " ".join((info.name or info.address).split())
-    if _model(info) == MODEL_MELK:
-        return f"Lotus strip {name}"
-    return f"Monster lights {name}"
+    return f"Monster lights {info.name or info.address}"
 
 
 def _data(info: BluetoothServiceInfoBleak) -> dict[str, str]:
-    return {CONF_ADDRESS: info.address, CONF_MODEL: _model(info) or MODEL_SURPLIFE}
+    return {CONF_ADDRESS: info.address}
 
 
 class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -74,7 +66,7 @@ class MonsterLedsConfigFlow(ConfigFlow, domain=DOMAIN):
         for info in async_discovered_service_info(self.hass, connectable=True):
             if info.address in configured:
                 continue
-            if _model(info) is not None:
+            if _supported(info):
                 self._found[info.address] = info
         if not self._found:
             return self.async_abort(reason="no_devices_found")

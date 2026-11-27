@@ -8,9 +8,7 @@ from homeassistant.const import CONF_ADDRESS, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import CONF_MODEL, MODEL_MELK, MODEL_SURPLIFE
 from .device import SurplifeLights
-from .melk_device import MelkLights
 
 PLATFORMS = [Platform.LIGHT]
 
@@ -24,8 +22,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Bluetooth adapter or an ESPHome Bluetooth proxy?"
         )
 
-    model = entry.data.get(CONF_MODEL, MODEL_SURPLIFE)
-    device = (MelkLights if model == MODEL_MELK else SurplifeLights)(ble_device, entry.title)
+    device = SurplifeLights(ble_device, entry.title)
     last = bluetooth.async_last_service_info(hass, address, connectable=False)
     if last is not None:
         device.update_from_advertisement(None, last.manufacturer_data)

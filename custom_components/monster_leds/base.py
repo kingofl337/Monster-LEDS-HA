@@ -44,7 +44,6 @@ class LightDevice:
 
     assumed_state = False
     min_interval = 0.5  # seconds; slower devices raise this
-    hardware_brightness = False  # True: colors are sent at full value plus a brightness command
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         self.name = name
@@ -84,13 +83,6 @@ class LightDevice:
 
     async def _send_scene(self, name: str, brightness_pct: float, client) -> None:
         raise NotImplementedError
-
-    async def _send_brightness(self, brightness_pct: float, client) -> None:
-        """Only for hardware_brightness devices."""
-        raise NotImplementedError
-
-    def _level(self, color: Color, brightness_pct: float) -> Color:
-        return color if self.hardware_brightness else dim(color, brightness_pct)
 
     # ---------------------------------------------------------- plumbing
     @property
@@ -150,7 +142,7 @@ class LightDevice:
         step = 0
         failures = 0
         while True:
-            frame = [self._level(c, brightness_pct)
+            frame = [dim(c, brightness_pct)
                      for c in animation_frame(anim, step, self.pixel_count, self._rng)]
 
             async def _send(client, frame=frame) -> None:
@@ -210,12 +202,10 @@ class LightDevice:
                 await self._send_scene(new_effect, bri, client)
             elif new_effect in PATTERNS:
                 await self._send_frame(
-                    [self._level(c, bri) for c in repeat(PATTERNS[new_effect], self.pixel_count)],
+                    [dim(c, bri) for c in repeat(PATTERNS[new_effect], self.pixel_count)],
                     client)
             elif new_effect is None:
                 await self._send_solid(new_hs, bri, client)
-            if self.hardware_brightness:
-                await self._send_brightness(bri, client)
 
         if changed or not was_on:
             await self.link.run(_act)
