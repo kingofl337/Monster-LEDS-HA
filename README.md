@@ -1,4 +1,4 @@
-# Monster-LEDS-HA
+# Surplife-LEDS-HA
 
 Control Monster / CZJUTAI Bluetooth Christmas lights (the ones that use the **Surplife** app
 and advertise as `IOTBTxxxx`) from Home Assistant, with no cloud and no phone.
