@@ -1,0 +1,40 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "description": "Choose the lights to set up.",
+        "data": {
+          "address": "Lights"
+        }
+      },
+      "bluetooth_confirm": {
+        "description": "Set up {name}?"
+      }
+    },
+    "abort": {
+      "already_configured": "These lights are already set up.",
+      "no_devices_found": "No IOTBT lights found. Make sure they are powered, close the Surplife app, and check that they are in range of a Bluetooth adapter or ESPHome Bluetooth proxy."
+    }
+  },
+  "services": {
+    "set_leds": {
+      "name": "Set LEDs",
+      "description": "Color individual LEDs, leaving the rest unchanged.",
+      "fields": {
+        "leds": {
+          "name": "LEDs",
+          "description": "LED numbers, starting at 1."
+        },
+        "rgb_color": {
+          "name": "Color",
+          "description": "Color as [red, green, blue]."
+        },
+        "brightness_pct": {
+          "name": "Brightness",
+          "description": "Brightness in percent."
+        }
+      }
+    }
+  }
+}
