@@ -27,7 +27,7 @@ lights off, stops the animation.
 ## Install
 
 1. In HACS, open the three-dot menu, choose **Custom repositories**, and add
-   `https://github.com/kingofl337/Monster-LEDS-HA` as type **Integration**.
+   `https://github.com/kingofl337/Surplife-LEDS-HA` as type **Integration**.
 2. Download **Monster LEDs (Surplife & Lotus Bluetooth)** and restart Home Assistant.
 3. The lights should be discovered automatically. If not, go to **Settings → Devices & services →
    Add integration → Monster LEDs**.
