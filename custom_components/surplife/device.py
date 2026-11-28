@@ -22,7 +22,7 @@ class SurplifeLights(LightDevice):
     """Talks to one Surplife controller; keeps an optimistic copy of its state."""
 
     min_interval = 0.3  # one frame is 2 writes, about 0.15 s
-    uniform_min_interval = 0.05  # fades change one color group: a single short write
+    uniform_min_interval = 0.04  # fades change one color group: a single short write
 
     def __init__(self, ble_device: BLEDevice, name: str) -> None:
         super().__init__(ble_device, name)

@@ -153,8 +153,10 @@ class LightDevice:
         )
 
     async def _animate(self, anim: Animation, brightness_pct: float, interval: float) -> None:
+        loop = asyncio.get_running_loop()
         step = 0
         failures = 0
+        next_frame = loop.time()
         while True:
             frame = [dim(c, brightness_pct)
                      for c in animation_frame(anim, step, self.pixel_count, self._rng)]
@@ -172,8 +174,12 @@ class LightDevice:
                     _LOGGER.warning("%s: stopping animation, lights unreachable", self.name)
                     return
                 await asyncio.sleep(5)
+                next_frame = loop.time()
             step += 1
-            await asyncio.sleep(interval)
+            # Fixed frame rate: a slow write eats into the wait instead of stretching the
+            # frame, so fades keep an even pace. If we fell behind, don't try to catch up.
+            next_frame = max(next_frame + interval, loop.time())
+            await asyncio.sleep(next_frame - loop.time())
 
     # ---------------------------------------------------------- actions
     async def turn_off(self) -> None:
