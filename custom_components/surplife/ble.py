@@ -26,6 +26,7 @@ class BleLink:
 
     def __init__(self, ble_device: BLEDevice, name: str, on_connect: Action | None = None) -> None:
         self.ble_device = ble_device
+        self.idle_seconds: float = IDLE_DISCONNECT_SECONDS
         self.name = name
         self._on_connect = on_connect
         self._client: BleakClientWithServiceCache | None = None
@@ -81,7 +82,7 @@ class BleLink:
     def _reset_timer(self) -> None:
         if self._timer is not None:
             self._timer.cancel()
-        self._timer = asyncio.get_running_loop().call_later(IDLE_DISCONNECT_SECONDS, self._idle)
+        self._timer = asyncio.get_running_loop().call_later(self.idle_seconds, self._idle)
 
     def _idle(self) -> None:
         self._timer = None

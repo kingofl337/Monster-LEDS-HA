@@ -36,5 +36,16 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Connection",
+        "description": "Animated effects keep the connection open while they run; this only applies once the lights are idle.",
+        "data": {
+          "disconnect_delay": "Disconnect after idle (seconds)"
+        }
+      }
+    }
   }
 }

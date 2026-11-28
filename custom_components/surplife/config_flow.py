@@ -9,10 +9,11 @@ from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
 )
-from homeassistant.config_entries import ConfigFlow
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
 from homeassistant.const import CONF_ADDRESS
+from homeassistant.core import callback
 
-from .const import DOMAIN
+from .const import CONF_DISCONNECT_DELAY, DOMAIN, IDLE_DISCONNECT_SECONDS
 from .protocol import NAME_PREFIX
 
 
@@ -32,6 +33,11 @@ class SurplifeConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle setup of Surplife lights."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> "SurplifeOptionsFlow":
+        return SurplifeOptionsFlow()
 
     def __init__(self) -> None:
         self._discovery: BluetoothServiceInfoBleak | None = None
@@ -78,4 +84,23 @@ class SurplifeConfigFlow(ConfigFlow, domain=DOMAIN):
                     {addr: f"{_title(info)} ({addr})" for addr, info in self._found.items()}
                 )
             }),
+        )
+
+
+class SurplifeOptionsFlow(OptionsFlow):
+    """Disconnect delay: how long an idle connection stays open."""
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None):
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+        current = self.config_entry.options.get(CONF_DISCONNECT_DELAY, IDLE_DISCONNECT_SECONDS)
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_DISCONNECT_DELAY, default=current): vol.All(
+                        vol.Coerce(int), vol.Range(min=1, max=3600)
+                    )
+                }
+            ),
         )
