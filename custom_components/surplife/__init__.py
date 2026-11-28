@@ -8,6 +8,7 @@ from homeassistant.const import CONF_ADDRESS, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from .const import CONF_DISCONNECT_DELAY, IDLE_DISCONNECT_SECONDS
 from .device import SurplifeLights
 
 PLATFORMS = [Platform.LIGHT, Platform.SELECT]
@@ -23,6 +24,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     device = SurplifeLights(ble_device, entry.title)
+    device.link.idle_seconds = max(
+        1, int(entry.options.get(CONF_DISCONNECT_DELAY, IDLE_DISCONNECT_SECONDS))
+    )
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     last = bluetooth.async_last_service_info(hass, address, connectable=False)
     if last is not None:
         device.update_from_advertisement(None, last.manufacturer_data)
@@ -60,6 +65,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _async_stop))
     return True
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    entry.runtime_data.link.idle_seconds = max(
+        1, int(entry.options.get(CONF_DISCONNECT_DELAY, IDLE_DISCONNECT_SECONDS))
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

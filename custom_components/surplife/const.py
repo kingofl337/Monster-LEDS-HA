@@ -6,7 +6,8 @@ from dataclasses import dataclass, field
 DOMAIN = "surplife"
 
 DEFAULT_LED_COUNT = 50
-IDLE_DISCONNECT_SECONDS = 60  # free the lights for the phone app / proxy slots
+IDLE_DISCONNECT_SECONDS = 60  # default; free the lights for the phone app / proxy slots
+CONF_DISCONNECT_DELAY = "disconnect_delay"  # option: seconds idle before disconnecting
 
 Color = tuple[float, float, float]  # hue degrees, saturation 0-100, value 0-100
 
