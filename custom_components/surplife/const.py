@@ -55,7 +55,7 @@ ANIMATIONS: dict[str, Animation] = {
     "Red & green flip": Animation("alternate", [], interval=2.0,
                                   frames=[[RED, GREEN], [GREEN, RED]]),
     # Pixels alternate red, green; the reds fade out and back, then the greens
-    "R+G Fade": Animation("fade", [RED, GREEN], interval=0.06, steps=25),
+    "R+G Fade": Animation("fade", [RED, GREEN], interval=0.06, steps=12),
 }
 
 # Animated scenes built into the Surplife controller: effect id + color list
