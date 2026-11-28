@@ -221,7 +221,11 @@ class LightDevice:
             elif new_effect is None:
                 await self._send_solid(new_hs, bri, client)
 
-        if changed or not was_on:
+        # Switching an already-on light to an animation needs no command of its own: the
+        # animation's first frame opens the connection. Skipping the extra round trip keeps
+        # a busy or flaky Bluetooth link from failing the whole action.
+        skip = was_on and new_effect in ANIMATIONS
+        if (changed or not was_on) and not skip:
             await self.link.run(_act)
         if new_effect in ANIMATIONS and (changed or not was_on or self._anim_task is None):
             self._start_animation(ANIMATIONS[new_effect], bri)

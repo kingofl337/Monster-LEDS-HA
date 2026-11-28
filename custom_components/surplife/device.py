@@ -6,6 +6,7 @@ import logging
 from typing import Any
 
 from bleak.backends.device import BLEDevice
+from bleak.exc import BleakError
 
 from . import protocol as p
 from .base import LightDevice, dim
@@ -83,7 +84,12 @@ class SurplifeLights(LightDevice):
     # ---------------------------------------------------------- connection
     async def _on_connect(self, client) -> None:
         self._chunk = p.chunk_for_mtu(await self._read_mtu(client))
-        await client.start_notify(p.NOTIFY_UUID, self._on_notify)
+        try:
+            await client.start_notify(p.NOTIFY_UUID, self._on_notify)
+        except BleakError as err:
+            # Status replies are a nice-to-have; some controllers reject the subscription
+            # ("Unlikely Error") but still take commands, so carry on without them.
+            _LOGGER.debug("%s: no status notifications: %s", self.name, err)
         self._seq = 0
         self._last_frame = None
         # Same opening the Surplife app uses: set the clock, then ask for status
